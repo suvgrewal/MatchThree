@@ -14,16 +14,22 @@ public class Board : MonoBehaviour
 
     [SerializeField]
     private GameObject _tilePrefab;
+    [SerializeField]
+    private GameObject[] _gamePiecePrefabs;
 
     private Tile[,] _allTiles;
+    private GamePiece[,] _allGamePieces;
 
     void Start()
     {
         _allTiles = new Tile[_width, _height];
+        _allGamePieces = new GamePiece[_width, _height];
 
         SetUpTiles();
 
         SetUpCamera();
+
+        FillRandom();
     }
 
     void SetUpTiles()
@@ -39,6 +45,8 @@ public class Board : MonoBehaviour
                 _allTiles[i, j] = tile.GetComponent<Tile>();
 
                 tile.transform.parent = transform;
+
+                _allTiles[i, j].Init(i, j, this);
             }
         }
     }
@@ -54,5 +62,53 @@ public class Board : MonoBehaviour
         float horizontalOrthographicSize = ((float) _width / 2f + (float) _borderSize)  / aspectRatio;
 
         Camera.main.orthographicSize = (verticalOrthographicSize > horizontalOrthographicSize) ? verticalOrthographicSize : horizontalOrthographicSize;
+    }
+
+    GameObject GetRandomGamePiece()
+    {
+        int randomIdx = Random.Range(0, _gamePiecePrefabs.Length);
+
+        if (_gamePiecePrefabs[randomIdx] == null)
+        {
+            Debug.LogWarning("BOARD: " + randomIdx + "does not contain a valid GamePiece prefab!");
+        }
+
+        return _gamePiecePrefabs[randomIdx];
+    }
+
+    void PlaceGamePiece(GamePiece gamePiece, int x, int y)
+    {
+        if (gamePiece == null)
+        {
+            Debug.LogWarning("BOARD: Invalid GamePiece!");
+
+            return;
+        }
+
+
+        gamePiece.transform.position = new Vector3(x, y, 0);
+        gamePiece.transform.rotation = Quaternion.identity;
+        gamePiece.SetCoord(x, y);
+    }
+
+    void PlaceRandomGamePiece(int xIdx, int yIdx)
+    {
+        GameObject randomPiece = Instantiate(GetRandomGamePiece(), Vector3.zero, Quaternion.identity) as GameObject;
+
+        if (randomPiece != null)
+        {
+            PlaceGamePiece(randomPiece.GetComponent<GamePiece>(), xIdx, yIdx);
+        }
+    }
+
+    void FillRandom()
+    {
+        for (int i = 0; i < _width;  i++)
+        {
+            for (int j = 0; j < _height; j++)
+            {
+                PlaceRandomGamePiece(i, j);
+            }
+        }
     }
 }
