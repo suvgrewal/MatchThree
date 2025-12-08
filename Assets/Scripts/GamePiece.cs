@@ -9,6 +9,21 @@ public class GamePiece : MonoBehaviour
 
     private bool _isMoving;
 
+    [SerializeField]
+    private float _timeToMove = 0.5f;
+    [SerializeField]
+    private InterpType _interpolation = InterpType.SmootherStep;
+
+    public enum InterpType
+    {
+        Linear,
+        EaseOut,
+        EaseIn,
+        Exponential,
+        SmoothStep,
+        SmootherStep
+    };
+
     void Start()
     {
         
@@ -18,12 +33,12 @@ public class GamePiece : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
         {
-            Move((int)transform.position.x + 1, (int)transform.position.y, 0.5f);
+            Move(xIndex + 1, yIndex, _timeToMove);
         }
 
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
         {
-            Move((int)transform.position.x - 1, (int)transform.position.y, 0.5f);
+            Move(xIndex - 1, yIndex, _timeToMove);
         }
     }
 
@@ -51,7 +66,7 @@ public class GamePiece : MonoBehaviour
 
         float elapsedTime = 0f;
 
-        while (!reachedDestination)
+        while (!reachedDestination && (elapsedTime < timeToMove))
         {
             if (Vector3.Distance(transform.position, destination) < 0.01f)
             {
@@ -63,12 +78,80 @@ public class GamePiece : MonoBehaviour
             
             elapsedTime += Time.deltaTime;
 
-            float t = elapsedTime / timeToMove;
-            transform.position = Vector3.Lerp(startPosition, destination, t);
+            float timeFactor = Mathf.Clamp(elapsedTime / timeToMove, 0f, 1f);
+
+            timeFactor = Interpolate(timeFactor);
+
+            transform.position = Vector3.Lerp(startPosition, destination, timeFactor);
             
             yield return null;
         }
 
         _isMoving = false;
+    }
+
+    float Interpolate(float timeFactor)
+    {
+        switch (_interpolation)
+        {
+            case InterpType.Linear:
+                timeFactor = Linear(timeFactor);
+                break;
+
+            case InterpType.EaseOut:
+                timeFactor = EaseOut(timeFactor);
+                break;
+
+            case InterpType.EaseIn:
+                timeFactor = EaseIn(timeFactor);
+                break;
+
+            case InterpType.Exponential:
+                timeFactor = Exponential(timeFactor);
+                break;
+
+            case InterpType.SmoothStep:
+                timeFactor = SmoothStep(timeFactor);
+                break;
+
+            case InterpType.SmootherStep:
+                timeFactor = SmootherStep(timeFactor);
+                break;
+
+            default:
+                break;
+        }
+
+        return timeFactor;
+    }
+
+    float Linear(float timeFactor)
+    {
+        return timeFactor;
+    }
+
+    float EaseOut(float timeFactor)
+    {
+        return Mathf.Sin(timeFactor * Mathf.PI * 0.5f);
+    }
+
+    float EaseIn(float timeFactor)
+    {
+        return 1 - Mathf.Cos(timeFactor * Mathf.PI * 0.5f);
+    }
+
+    float Exponential(float timeFactor)
+    {
+        return timeFactor * timeFactor;
+    }
+
+    float SmoothStep(float timeFactor)
+    {
+        return timeFactor * timeFactor * (3 - 2 * timeFactor);
+    }
+
+    float SmootherStep(float timeFactor)
+    {
+        return timeFactor * timeFactor * timeFactor * ((timeFactor * (timeFactor * 6 - 15)) + 10);
     }
 }
