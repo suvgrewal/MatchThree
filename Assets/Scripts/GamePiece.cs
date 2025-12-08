@@ -31,6 +31,8 @@ public class GamePiece : MonoBehaviour
 
     void Update()
     {
+        /*                
+        // for testing
         if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
         {
             Move(xIndex + 1, yIndex, _timeToMove);
@@ -40,6 +42,9 @@ public class GamePiece : MonoBehaviour
         {
             Move(xIndex - 1, yIndex, _timeToMove);
         }
+        */
+
+
     }
 
     public void SetCoord(int x, int y)

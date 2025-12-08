@@ -20,6 +20,9 @@ public class Board : MonoBehaviour
     private Tile[,] _allTiles;
     private GamePiece[,] _allGamePieces;
 
+    private Tile _clickedTile;
+    private Tile _targetTile;
+
     void Start()
     {
         _allTiles = new Tile[_width, _height];
@@ -110,5 +113,37 @@ public class Board : MonoBehaviour
                 PlaceRandomGamePiece(i, j);
             }
         }
+    }
+
+    public void ClickTile(Tile tile)
+    {
+        if (_clickedTile == null)
+        {
+            _clickedTile = tile;
+            Debug.Log("Clicked tile: " + tile.name);
+        }
+    }
+
+    public void DragToTile(Tile tile)
+    {
+        if (_clickedTile != null)
+        {
+            _targetTile = tile;
+            Debug.Log("Dragged tile: " + tile.name);
+        }
+    }
+
+    public void ReleaseTile()
+    {
+        if (_clickedTile != null && _targetTile != null)
+        {
+            SwitchTiles(_clickedTile, _targetTile);
+        }
+    }
+
+    void SwitchTiles(Tile clickedTile, Tile targetTile)
+    {
+        _clickedTile = null;
+        _targetTile = null;
     }
 }
