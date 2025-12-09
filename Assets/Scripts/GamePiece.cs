@@ -9,8 +9,8 @@ public class GamePiece : MonoBehaviour
 
     private bool _isMoving;
 
-    [SerializeField]
-    private float _timeToMove = 0.5f;
+    private Board _board;
+    
     [SerializeField]
     private InterpType _interpolation = InterpType.SmootherStep;
 
@@ -31,20 +31,12 @@ public class GamePiece : MonoBehaviour
 
     void Update()
     {
-        /*                
-        // for testing
-        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
-        {
-            Move(xIndex + 1, yIndex, _timeToMove);
-        }
 
-        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
-        {
-            Move(xIndex - 1, yIndex, _timeToMove);
-        }
-        */
+    }
 
-
+    public void Init(Board board)
+    {
+        _board = board;
     }
 
     public void SetCoord(int x, int y)
@@ -76,8 +68,12 @@ public class GamePiece : MonoBehaviour
             if (Vector3.Distance(transform.position, destination) < 0.01f)
             {
                 reachedDestination = true;
-                transform.position = destination;
-                SetCoord((int) destination.x, (int) destination.y);
+
+                if (_board != null)
+                {
+                    _board.PlaceGamePiece(this, (int) destination.x, (int) destination.y);
+                }
+
                 break;
             }
             

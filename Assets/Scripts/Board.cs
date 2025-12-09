@@ -23,6 +23,8 @@ public class Board : MonoBehaviour
     private Tile _clickedTile;
     private Tile _targetTile;
 
+    public float swapTime = 0.5f;
+
     void Start()
     {
         _allTiles = new Tile[_width, _height];
@@ -79,7 +81,7 @@ public class Board : MonoBehaviour
         return _gamePiecePrefabs[randomIdx];
     }
 
-    void PlaceGamePiece(GamePiece gamePiece, int x, int y)
+    public void PlaceGamePiece(GamePiece gamePiece, int x, int y)
     {
         if (gamePiece == null)
         {
@@ -91,6 +93,12 @@ public class Board : MonoBehaviour
 
         gamePiece.transform.position = new Vector3(x, y, 0);
         gamePiece.transform.rotation = Quaternion.identity;
+
+        if (IsWithinBounds(x, y))
+        {
+            _allGamePieces[x, y] = gamePiece;
+        }
+        
         gamePiece.SetCoord(x, y);
     }
 
@@ -100,8 +108,15 @@ public class Board : MonoBehaviour
 
         if (randomPiece != null)
         {
+            randomPiece.GetComponent<GamePiece>().Init(this);
+
             PlaceGamePiece(randomPiece.GetComponent<GamePiece>(), xIdx, yIdx);
         }
+    }
+
+    bool IsWithinBounds(int x, int y)
+    {
+        return (x >= 0 && x < _width && y >= 0 && y < _height);
     }
 
     void FillRandom()
@@ -120,7 +135,6 @@ public class Board : MonoBehaviour
         if (_clickedTile == null)
         {
             _clickedTile = tile;
-            Debug.Log("Clicked tile: " + tile.name);
         }
     }
 
@@ -129,8 +143,15 @@ public class Board : MonoBehaviour
         if (_clickedTile != null)
         {
             _targetTile = tile;
-            Debug.Log("Dragged tile: " + tile.name);
         }
+    }
+
+    public bool IsNextTo(Tile startTile, Tile endTile)
+    {
+        int dx = Mathf.Abs(startTile.xIndex - endTile.xIndex);
+        int dy = Mathf.Abs(startTile.yIndex - endTile.yIndex);
+
+        return (dx + dy) == 1;
     }
 
     public void ReleaseTile()
@@ -139,11 +160,29 @@ public class Board : MonoBehaviour
         {
             SwitchTiles(_clickedTile, _targetTile);
         }
+
+        _clickedTile = null;
+        _targetTile = null;
     }
 
     void SwitchTiles(Tile clickedTile, Tile targetTile)
     {
-        _clickedTile = null;
-        _targetTile = null;
+        if (!IsNextTo(clickedTile, targetTile))
+        {
+            Debug.Log("Clicked tile is not next to target tile");
+            return;
+        }
+
+        GamePiece clickedPiece = _allGamePieces[clickedTile.xIndex, clickedTile.yIndex];
+        GamePiece targetPiece = _allGamePieces[targetTile.xIndex, targetTile.yIndex];
+
+        _allGamePieces[clickedTile.xIndex, clickedTile.yIndex] = targetPiece;
+        _allGamePieces[targetTile.xIndex, targetTile.yIndex] = clickedPiece;
+
+        clickedPiece.Move(targetTile.xIndex, targetTile.yIndex, swapTime);
+        targetPiece.Move(clickedTile.xIndex, clickedTile.yIndex, swapTime);
+        
+        clickedPiece.SetCoord(targetTile.xIndex, targetTile.yIndex);
+        targetPiece.SetCoord(clickedTile.xIndex, clickedTile.yIndex);
     }
 }
