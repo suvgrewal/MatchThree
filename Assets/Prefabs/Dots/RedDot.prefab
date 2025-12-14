@@ -97,5 +97,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xIndex: 0
   yIndex: 0
-  _timeToMove: 0.5
   _interpolation: 4
+  _matchValue: 6

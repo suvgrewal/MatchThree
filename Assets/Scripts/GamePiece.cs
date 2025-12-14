@@ -14,6 +14,8 @@ public class GamePiece : MonoBehaviour
     [SerializeField]
     private InterpType _interpolation = InterpType.SmootherStep;
 
+    public MatchValue _matchValue;
+
     public enum InterpType
     {
         Linear,
@@ -24,9 +26,22 @@ public class GamePiece : MonoBehaviour
         SmootherStep
     };
 
+    public enum MatchValue
+    {
+        Yellow,
+        Blue,
+        Magenta,
+        Indigo,
+        Green,
+        Teal,
+        Red,
+        Cyan,
+        Wild
+    }
+
     void Start()
     {
-        
+
     }
 
     void Update()
